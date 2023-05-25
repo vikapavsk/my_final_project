@@ -1,0 +1,59 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content%}
+
+{% if articles_by_category %}
+
+<h1>{{ cats }}</h1>
+</br>
+
+{% for article in articles_by_category %}
+    <div class="card w-75">
+        <div class="card-header">
+            <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+                <div class="btn-group btn-group-sm" role="group" aria-label="First group">
+                    Posted by {{ article.author.username }} on {{ article.publication_date }}
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end btn-group-sm">
+                    <a class="btn btn-secondary btn-sm" href="{% url 'category' post.category|slugify %}" role="button">{{ article.category }}</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">
+                <a href="{% url 'article-detail' post.pk %}" class="text-dark">{{ article.title }}</a>
+            </h5>
+            <p class="card-text">{{ article.text|safe|truncatechars:360 }}</p>
+        </div>
+        <div class="card-footer">
+            <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+                <div class="btn-group btn-group-sm" role="group" aria-label="First group">
+                    <a class="btn btn-outline-secondary me-md-2 btn-sm" href="{% url 'article-detail' post.pk %}" role="button">
+                        Отклики
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
+                            {{ article.responses.count }}
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    </a>
+                </div>
+                {% if user.is_authenticated %}
+                    {% if user.id == article.author.id %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end btn-group-sm">
+                            <a class="btn btn-outline-secondary me-md-2 btn-sm" href="{% url 'article_edit' post.pk %}" role="button">Edit</a>
+                            <a class="btn btn-outline-danger btn-sm" href="{% url 'article_delete' post.pk %}" role="button">Delete</a>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</br></br>
+{% endfor %}
+
+{% else %}
+
+    <h2>Sorry this page does not exist ...</h2>
+
+{% endif %}
+
+{% endblock %}

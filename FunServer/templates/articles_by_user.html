@@ -1,0 +1,89 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content%}
+
+{% if user.is_authenticated %}
+    <h1> Публикации {{ user.username }}</h1>
+    <br/>
+
+<!-- Search form block -->
+<form method="GET">
+    {{ filter.form.as_p }}
+    <input type="submit" value="Search" class="btn btn-secondary" role="button">
+    <a class="btn btn-secondary" href="{% url 'articles_by_user'%}" role="button">Сбросить фильтры</a>
+</form>
+<br/><br/>
+<!-- End Search form block -->
+
+
+    {% for article in filter.qs %}
+        <div class="card w-75">
+            <div class="card-header">
+                <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="First group">
+                        Опубликовано пользователем {{ article.author.username }} , дата публикации {{ article.publication_date }}
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end btn-group-sm">
+                        <a class="btn btn-secondary btn-sm" href="{% url 'category' article.category|slugify %}" role="button">{{ article.category }}</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'article_detail' article.pk %}" class="text-dark">{{ article.title }}</a>
+                </h5>
+                <p class="card-text">{{ article.text|safe|truncatechars:120 }}</p>
+            </div>
+            <div class="card-footer">
+                <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="First group">
+                        <a class="btn btn-outline-secondary me-md-2 btn-sm" href="{% url 'article_detail' article.pk %}" role="button">
+                            Отклики
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
+                                {{ article.responses.count }}
+                                <span class="visually-hidden">unread messages</span>
+                            </span>
+                        </a>
+                    </div>
+                    {% if user.is_authenticated %}
+                        {% if user.id == article.author.id %}
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end btn-group-sm">
+                                <a class="btn btn-outline-secondary me-md-2 btn-sm" href="{% url 'article_update' article.pk %}" role="button">Edit</a>
+                                <a class="btn btn-outline-danger btn-sm" href="{% url 'article_delete' article.pk %}" role="button">Delete</a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="card-text"></p>
+                {% if not article.responses.all %}
+                    Откликов пока нет ...
+                {% else %}
+                    {% if user.is_authenticated %}
+                        {% if user.id == article.author.id %}
+                            {% for response in article.responses.all %}
+                                <strong>{{ response.author }} - {{ response.publication_date }}</strong>
+                                <br/>
+                                {{ response.text }}
+                                </br>
+                                {% if not response.status %}
+                                    <a class="btn btn-primary btn-sm" href="{% url 'response_approve' pk=response.pk %}" role="button">Принять<span class="glyphicon glyphicon-ok"></span></a>
+                                    <a class="btn btn-danger btn-sm" href="{% url 'response_delete' pk=response.pk %}" role="button">Удалить<span class="glyphicon glyphicon-remove"></span></a>
+                                {% else %}
+                                    <a class="btn btn-secondary btn-sm" href="{% url 'response_deny' pk=response.pk %}" role="button">Отклонить<span class="glyphicon glyphicon-remove"></span></a>
+                                    <a class="btn btn-danger btn-sm disabled" role="button" aria-disabled="true">Удалить<span class="glyphicon glyphicon-remove"></span></a>
+                                {% endif %}
+                                <br/><br/>
+                            {% endfor %}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+                </p>
+            </div>
+        </div>
+    </br></br>
+    {% endfor %}
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+Article
+{% endblock title %}
+
+{% block content %}
+<h1 style="text-align: center;margin-top: 20px">Oбъявление № {{ article.pk }}</h1>
+<p class="text-center"><a href="{% url 'articles_list' %}" class="btn btn-info">К объявлениям</a></p>
+
+{% if request.user == article.author %}
+<a class="btn btn-warning" href="/articles/{{ article.id }}/update" role="button">Изменить</a>
+<a class="btn btn-danger" href="/articles/{{ article.id }}/delete" role="button">Удалить</a>
+{% endif %}
+
+<hr>
+
+<h1 style="text-align: left; font-size: 18px;">Заголовок: {{ article.title }}</h1>
+<p style="text-align: left; font-size: 18px;">Категория: {{ article.category }}</p>
+<p style="text-align: middle; font-size: 20px;">{{ article.text }}</p>
+<img src="{{ article.upload.url }}" width="200" height="200">
+</br></br>
+<small>
+  <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+    <div class="btn-group btn-group-sm" role="group" aria-label="First group">
+      <p>Опубликовано пользователем
+      <strong>
+        {{ article.author.username }}
+      </strong>
+       , дата публикации: {{ article.publication_date }}
+      </p>
+    </div>
+  </div>
+</small>
+
+<hr>
+
+</br>
+<h2>{{ article_responses_count }} Отклики на объявление </h2>
+</br>
+
+{% if not article_responses.all %}
+  Откликов пока нет ...
+{% endif %}
+</br></br>
+{% if user.is_authenticated %}
+{% if user.id != article.author.id %}
+    <a href="{% url 'response_create' article.pk %}">Оставить отклик</a>
+{% else %}
+  Владелец объявления не может оставлять комментарии
+{% endif %}
+{% else %}
+Необходимо <a href="{% url 'response_create' article.pk %}">войти</a> на сайт, чтобы писать отклики
+{% endif %}
+
+</br></br>
+
+{% for response in article_responses %}
+
+    <strong>{{ response.author }} - {{ response.publication_date }}</strong>
+    <br/>
+    {{ response.text }}
+    </br>
+      {% if user.is_authenticated %}
+        {% if user.id == article.author.id %}
+          {% if not comment.approved_comment %}
+              <a class="btn btn-primary btn-sm" href="{% url 'response_approve' pk=response.pk %}" role="button">Принять<span class="glyphicon glyphicon-ok"></span></a>
+              <a class="btn btn-danger btn-sm" href="{% url 'response_delete' pk=response.pk %}" role="button">Удалить<span class="glyphicon glyphicon-remove"></span></a>
+          {% else %}
+              <a class="btn btn-secondary btn-sm" href="{% url 'response_deny' pk=response.pk %}" role="button">Отклонить<span class="glyphicon glyphicon-remove"></span></a>
+              <a class="btn btn-danger btn-sm disabled" role="button" aria-disabled="true">Удалить<span class="glyphicon glyphicon-remove"></span></a>
+          {% endif %}
+          <br/>
+        {% endif %}
+      {% endif %}
+      <br/>
+  {% endfor %}
+
+
+
+
+<!--<hr>-->
+<!--<p style="text-align: center; font-size: 20px;">Комментарии к объявлению</p>-->
+<!--<br>-->
+
+<!--{% for item in article.responses.all %}-->
+<!--{% if item.status == True %}-->
+
+<!--<div class="accordion" id="accordionPanelsStayOpenExample">-->
+<!--  <div class="accordion-item">-->
+<!--    <h2 class="accordion-header" id="headingOne">-->
+<!--      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">-->
+<!--        Автор комментария {{item.author}}-->
+<!--      </button>-->
+<!--    </h2>-->
+<!--    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">-->
+<!--      <div class="accordion-body">-->
+<!--        {{item.text}}<hr>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--<p style="text-align: center;">&nbsp;</p>-->
+<!--</li>-->
+<!--{% endif %}-->
+<!--{% endfor %}-->
+<!--<p style="text-align: center;">&nbsp;</p>-->
+
+<!--{% if request.user == article.author %}-->
+<!--<h3 style="text-align: center; font-size: 20px;color:red;">Владелец объявления не может оставлять комментарии</h3>-->
+<!--{% else %}-->
+<!--{% if user.is_authenticated %}-->
+<!--    <form action="" id="add_form" method="post">-->
+<!--        {% csrf_token %}-->
+<!--        {{ form.as_p }}-->
+<!--    </form>-->
+
+<!--    <button form="add_form" type="submit" class="btn btn-primary">Добавить</button>-->
+
+<!--{% endif %}-->
+<!--{% endif %}-->
+<!--{% endblock content %}-->
+
+
+
+
+
+
+
+
+
+
+
